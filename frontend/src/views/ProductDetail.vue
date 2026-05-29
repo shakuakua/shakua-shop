@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '@/utils/api'
 import { useCartStore } from '@/stores/cart'
@@ -13,12 +13,13 @@ const auth = useAuthStore()
 const product = ref(null)
 const alsoBought = ref([])
 const quantity = ref(1)
-const startTime = Date.now()
+let startTime = 0
 
 async function load() {
   const { data } = await api.get(`/products/${route.params.id}`)
   product.value = data.product
   alsoBought.value = data.also_bought
+  startTime = Date.now()
 }
 
 function addCart() {
@@ -26,15 +27,28 @@ function addCart() {
   cart.addToCart(product.value.id, quantity.value)
 }
 
+function goProduct(id) {
+  router.push('/product/' + id)
+}
+
 onMounted(async () => {
   await load()
-  try {
-    await api.post('/browse-log', {
-      product_id: product.value?.id,
-      category_id: product.value?.category_id,
-      duration_seconds: Math.floor((Date.now() - startTime) / 1000),
+})
+
+onBeforeUnmount(() => {
+  const duration = Math.floor((Date.now() - startTime) / 1000)
+  if (product.value && duration > 0) {
+    fetch('/api/browse-log', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        product_id: product.value.id,
+        category_id: product.value.category_id,
+        duration_seconds: duration,
+      }),
+      keepalive: true,
     })
-  } catch { }
+  }
 })
 </script>
 
@@ -82,7 +96,7 @@ onMounted(async () => {
     <div class="recommend" v-if="alsoBought.length">
       <h2>看了又看</h2>
       <div class="rec-grid">
-        <div v-for="p in alsoBought" :key="p.id" class="rec-card" @click="router.push(`/product/${p.id}`)">
+        <div v-for="p in alsoBought" :key="p.id" class="rec-card" @click="goProduct(p.id)">
           <div class="rec-img">
             <img v-if="p.image_url" :src="p.image_url" :alt="p.name" />
             <el-icon v-else size="32"><Goods /></el-icon>
