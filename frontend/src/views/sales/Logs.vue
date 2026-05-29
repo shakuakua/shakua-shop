@@ -19,6 +19,11 @@ function switchType(type) {
   load()
 }
 
+function formatTime(iso) {
+  if (!iso) return '-'
+  return new Date(iso).toLocaleString('zh-CN', { timeZone: 'Asia/Beijing', hour12: false })
+}
+
 onMounted(load)
 </script>
 
@@ -36,7 +41,7 @@ onMounted(load)
         <el-table-column prop="product_name" label="商品" />
         <el-table-column prop="duration_seconds" label="浏览时长(秒)" width="120" />
         <el-table-column label="时间" width="180">
-          <template #default="{ row }">{{ new Date(row.timestamp).toLocaleString() }}</template>
+          <template #default="{ row }">{{ formatTime(row.timestamp) }}</template>
         </el-table-column>
       </template>
       <template v-else>
@@ -45,7 +50,7 @@ onMounted(load)
         <el-table-column prop="content" label="内容" />
         <el-table-column prop="ip_address" label="IP" width="140" />
         <el-table-column label="时间" width="180">
-          <template #default="{ row }">{{ new Date(row.timestamp).toLocaleString() }}</template>
+          <template #default="{ row }">{{ formatTime(row.timestamp) }}</template>
         </el-table-column>
       </template>
     </el-table>

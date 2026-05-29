@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '@/utils/api'
 import { useCartStore } from '@/stores/cart'
@@ -31,24 +31,37 @@ function goProduct(id) {
   router.push('/product/' + id)
 }
 
+function sendBrowseLog() {
+  const duration = Math.floor((Date.now() - startTime) / 1000)
+  if (!product.value || duration <= 0) return
+  const token = localStorage.getItem('token')
+  fetch('/api/browse-log', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({
+      product_id: product.value.id,
+      category_id: product.value.category_id,
+      duration_seconds: duration,
+    }),
+    keepalive: true,
+  })
+}
+
 onMounted(async () => {
   await load()
 })
 
+watch(() => route.params.id, async () => {
+  sendBrowseLog()   // 先记录上一个商品的浏览时长
+  await load()
+  window.scrollTo(0, 0)
+})
+
 onBeforeUnmount(() => {
-  const duration = Math.floor((Date.now() - startTime) / 1000)
-  if (product.value && duration > 0) {
-    fetch('/api/browse-log', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        product_id: product.value.id,
-        category_id: product.value.category_id,
-        duration_seconds: duration,
-      }),
-      keepalive: true,
-    })
-  }
+  sendBrowseLog()   // 离开页面时记录
 })
 </script>
 
