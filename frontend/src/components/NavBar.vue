@@ -59,7 +59,7 @@ function goHome() {
     <div class="header-main">
       <div class="header-main-inner">
         <div class="logo" @click="goHome">
-          <span class="logo-icon">JD</span>
+          <span class="logo-icon">SHAKUA</span>
           <span class="logo-text">电商平台</span>
         </div>
 
