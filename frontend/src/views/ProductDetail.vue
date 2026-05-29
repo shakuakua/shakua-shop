@@ -202,6 +202,9 @@ onBeforeUnmount(() => {
   transition: all 0.2s;
 }
 .rec-card:hover { opacity: 0.8; }
+.rec-card * {
+  pointer-events: none;
+}
 .rec-img {
   width: 140px; height: 140px;
   background: #fafafa;
