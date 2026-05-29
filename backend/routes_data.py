@@ -29,7 +29,7 @@ def sales_trend():
         # Query orders in last 24h grouped by hour
         results = (
             db.session.query(
-                func.strftime("%H", Order.created_at).label("hour"),
+                func.strftime("%H", Order.created_at, '+8 hours').label("hour"),
                 func.count(Order.id).label("count"),
                 func.sum(Order.total_amount).label("revenue"),
             )
@@ -49,7 +49,7 @@ def sales_trend():
     # For week/month, group by day
     results = (
         db.session.query(
-            func.strftime("%Y-%m-%d", Order.created_at).label("day"),
+            func.strftime("%Y-%m-%d", Order.created_at, '+8 hours').label("day"),
             func.count(Order.id).label("count"),
             func.sum(Order.total_amount).label("revenue"),
         )

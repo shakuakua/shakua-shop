@@ -1,4 +1,12 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
+
+CST = timezone(timedelta(hours=8))
+
+def _fmt_time(t):
+    """Convert naive UTC datetime from SQLite to Beijing time string."""
+    if t is None:
+        return None
+    return t.replace(tzinfo=timezone.utc).astimezone(CST).strftime('%Y-%m-%d %H:%M:%S')
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -160,7 +168,7 @@ class LoginLog(db.Model):
             "id": self.id,
             "user_id": self.user_id,
             "username": self.user.username if self.user else "",
-            "login_time": self.login_time.isoformat() if self.login_time else None,
+            "login_time": _fmt_time(self.login_time),
             "ip_address": self.ip_address,
         }
 
@@ -186,7 +194,7 @@ class BrowseLog(db.Model):
             "product_name": self.product.name if self.product else "",
             "category_id": self.category_id,
             "duration_seconds": self.duration_seconds,
-            "timestamp": self.timestamp.isoformat() if self.timestamp else None,
+            "timestamp": _fmt_time(self.timestamp),
         }
 
 
@@ -209,5 +217,5 @@ class OperationLog(db.Model):
             "operation_type": self.operation_type,
             "content": self.content,
             "ip_address": self.ip_address,
-            "timestamp": self.timestamp.isoformat() if self.timestamp else None,
+            "timestamp": _fmt_time(self.timestamp),
         }
