@@ -42,6 +42,7 @@ function goHome() {
           </span>
           <span v-else>
             你好，<b>{{ auth.user?.username }}</b>
+            <span class="top-link" v-if="auth.isCustomer" @click="router.push('/profile')">个人中心</span>
             <span class="top-link" v-if="auth.isCustomer" @click="router.push('/orders')">我的订单</span>
             <span class="top-link" @click="auth.logout(); router.push('/')">退出</span>
           </span>
